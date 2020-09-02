@@ -6,14 +6,17 @@ let skeletonSource;
 let skeletonCapture;
 let stream;
 let canvas;
+let input;
 
 // This function is called when the video loads
 function vidLoad() {
-    video.loop();
-    video.volume(0);
+    video.volume(0.5);
 }
 
 function setup(){
+
+    // input = createFileInput(handleFile);
+    // input.position(0, 0);
     
     canvas = createCanvas(windowWidth, windowHeight);
     canvas.style('display', 'block');
@@ -26,6 +29,33 @@ function setup(){
     video = createVideo(['assets/DoubleDreamFeet.mp4'],vidLoad);
     video.hide();
 
+    // video controls
+
+    button = createButton('0.5X Speed');
+    button.position((windowWidth/2 - 320), 0);
+    button.size(128,25);
+    button.mousePressed(half_speed);
+
+    button = createButton('1X Speed');
+    button.position((windowWidth/2 - 320) + 128, 0);
+    button.size(128,25);
+    button.mousePressed(one_speed);
+
+    button = createButton('Pause');
+    button.position((windowWidth/2 - 320) + 256, 0);
+    button.size(128,25);
+    button.mousePressed(pause);
+
+    button = createButton('Play');
+    button.position((windowWidth/2 - 320) + 384, 0);
+    button.size(128,25);
+    button.mousePressed(play);
+
+    button = createButton('Restart');
+    button.position((windowWidth/2 - 320) + 512, 0);
+    button.size(128,25);
+    button.mousePressed(restart);
+
     // instantiate network for the source video
     poseNetSource = ml5.poseNet(video, modelLoaded);
     poseNetSource.on('pose', gotSourcePoses); 
@@ -36,11 +66,37 @@ function setup(){
 
 }
 
-function centerCanvas() {
-    var x = (windowWidth - width) / 2;
-    var y = (windowHeight - height) / 2;
-    canvas.position(x, y);
+// media control functions
+function half_speed() {
+    video.speed(0.5);
 }
+
+function one_speed() {
+    video.speed(1);
+}
+
+function pause() {
+    video.pause();
+}
+
+function play() {
+    video.play();
+}
+
+function restart() {
+    video.stop();
+}
+
+function handleFile(file) {
+    print(file);
+    if (file.type === 'video') {
+      video = createVideo(file.data, vidLoad);
+      video.hide();
+    } else {
+      video = null;
+    }
+  }
+
 
 // captures first pose detected from source video 
 function gotSourcePoses(poses){
@@ -63,14 +119,14 @@ function modelLoaded(){
 }
 
 function draw(){
-
+    
     // erase previously drawn skeleton/joints
     erase();
-    rect(0, 0, width, height);
+    rect(0, 0, windowWidth, windowHeight);
     noErase();
 
     // mirror video
-    translate(video.width, 0);
+    translate(stream.width, 0);
     scale(-1, 1);
     // draw the webcam stream
 
@@ -106,10 +162,10 @@ function draw(){
             
             // if model confidence is greater than 0.5, draw
             if(poseSource.keypoints[i].score > 0.5){
-                // draw green if error is less than 50
-                if(error < 50){
+                // draw green if error is less than 
+                if(error < 30){
                     fill(0, 255, 0);
-                // draw red if error is greater than 50
+                // draw red if error is greater than 
                 }else{
                     fill(255, 0, 0);
                 }
@@ -117,6 +173,7 @@ function draw(){
                 if(y1 > -centerOffsetY && y1 < -centerOffsetY + 480 && x1 > -centerOffsetX && x1 < -centerOffsetX + 640){
                     ellipse(x1,y1,8);  
                 }
+                // ellipse(x1,y1,8);
                  
             }
         }
@@ -135,7 +192,7 @@ function draw(){
 
             strokeWeight(4);
             // draw green if angle is within range
-            if(captureAngle < sourceAngle + 0.7 && captureAngle > sourceAngle - 0.7){
+            if(captureAngle < sourceAngle + 0.5 && captureAngle > sourceAngle - 0.5){
                 stroke(0,255,0);
             // draw red if out of range
             }else{
@@ -147,8 +204,10 @@ function draw(){
             let x2 = b.position.x - offsetX; 
             let y2 = b.position.y - offsetY;
 
-            if(y1 > -centerOffsetY && y1 < -centerOffsetY + 480 && x1 > -centerOffsetX && x1 < -centerOffsetX + 640 && y2 > -centerOffsetY && y2 < -centerOffsetY + 480 && x2 > -centerOffsetX && x2 < -centerOffsetX + 640)
-                line(x1 - centerOffsetX, y1 - centerOffsetY, x2 - centerOffsetX, y2 - centerOffsetY);      
+            line(x1 - centerOffsetX, y1 - centerOffsetY, x2 - centerOffsetX, y2 - centerOffsetY);
+
+            // if(y1 > -centerOffsetY && y1 < -centerOffsetY + 480 && x1 > -centerOffsetX && x1 < -centerOffsetX + 640 && y2 > -centerOffsetY && y2 < -centerOffsetY + 480 && x2 > -centerOffsetX && x2 < -centerOffsetX + 640)
+            //     line(x1 - centerOffsetX, y1 - centerOffsetY, x2 - centerOffsetX, y2 - centerOffsetY);      
         }
     }
 }
