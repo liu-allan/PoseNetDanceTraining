@@ -15,8 +15,8 @@ function vidLoad() {
 
 function setup(){
 
-    // input = createFileInput(handleFile);
-    // input.position(0, 0);
+    input = createFileInput(handleFile);
+    input.position(0, 0);
     
     canvas = createCanvas(windowWidth, windowHeight);
     canvas.style('display', 'block');
@@ -24,10 +24,6 @@ function setup(){
     // capture video from webcam
     stream = createCapture(VIDEO)
     stream.hide();
-
-    // capture video from source video
-    video = createVideo(['assets/DoubleDreamFeet.mp4'],vidLoad);
-    video.hide();
 
     // video controls
 
@@ -56,9 +52,7 @@ function setup(){
     button.size(128,25);
     button.mousePressed(restart);
 
-    // instantiate network for the source video
-    poseNetSource = ml5.poseNet(video, modelLoaded);
-    poseNetSource.on('pose', gotSourcePoses); 
+    
 
     // instantiate network for the webcame video
     poseNetCapture = ml5.poseNet(stream, modelLoaded);
@@ -90,10 +84,13 @@ function restart() {
 function handleFile(file) {
     print(file);
     if (file.type === 'video') {
-      video = createVideo(file.data, vidLoad);
-      video.hide();
+        video = createVideo(file.data, vidLoad);
+        video.hide();
+        // instantiate network for the source video
+        poseNetSource = ml5.poseNet(video, modelLoaded);
+        poseNetSource.on('pose', gotSourcePoses); 
     } else {
-      video = null;
+        video = null;
     }
   }
 
@@ -173,7 +170,6 @@ function draw(){
                 if(y1 > -centerOffsetY && y1 < -centerOffsetY + 480 && x1 > -centerOffsetX && x1 < -centerOffsetX + 640){
                     ellipse(x1,y1,8);  
                 }
-                // ellipse(x1,y1,8);
                  
             }
         }
@@ -205,9 +201,7 @@ function draw(){
             let y2 = b.position.y - offsetY;
 
             line(x1 - centerOffsetX, y1 - centerOffsetY, x2 - centerOffsetX, y2 - centerOffsetY);
-
-            // if(y1 > -centerOffsetY && y1 < -centerOffsetY + 480 && x1 > -centerOffsetX && x1 < -centerOffsetX + 640 && y2 > -centerOffsetY && y2 < -centerOffsetY + 480 && x2 > -centerOffsetX && x2 < -centerOffsetX + 640)
-            //     line(x1 - centerOffsetX, y1 - centerOffsetY, x2 - centerOffsetX, y2 - centerOffsetY);      
+  
         }
     }
 }
